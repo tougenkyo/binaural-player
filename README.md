@@ -1,7 +1,7 @@
-# Binaural Audio Player
+# Spatial Dual Player
 
-バイノーラル再生対応の2チャンネル音声プレイヤーです。  
-A two-channel audio player with binaural spatial positioning.
+2つの音声ファイルを独立した空間定位で同時再生できる、デュアルチャンネル音声プレイヤーです。  
+A dual-channel audio player that plays two audio files independently with spatial positioning.
 
 ![screenshot](images/screenshot.png)
 
@@ -9,8 +9,8 @@ A two-channel audio player with binaural spatial positioning.
 
 ## 特徴 / Features
 
-- **2チャンネル独立再生** — 左右それぞれ別の音声ファイルを再生
-- **バイノーラル位置設定** — クリック/ドラッグで音源の方向・距離を設定（ヘッドフォン推奨）
+- **デュアルチャンネル独立再生** — 2つの音声ファイルをそれぞれ独立したチャンネルで再生
+- **空間定位（バイノーラル）** — クリック/ドラッグで音源の方向・距離を3D空間内で設定（ヘッドフォン推奨）
 - **連続再生 / ランダム再生** — リスト内を順番またはランダムに連続再生
 - **多形式対応** — WAV / FLAC / OGG / AIFF / MP3 / AAC / OPUS
 - **フォルダドロップ対応** — フォルダをドロップするとその中の音声ファイルを一括追加
@@ -26,7 +26,7 @@ A two-channel audio player with binaural spatial positioning.
 |---|---|
 | OS | Windows 10/11（macOS / Linux は一部機能が異なる場合あり） |
 | Python | 3.10 以上 |
-| ヘッドフォン | バイノーラル効果にはヘッドフォン必須（スピーカーでは効果なし） |
+| ヘッドフォン | 空間定位効果にはヘッドフォン必須（スピーカーでは効果なし） |
 
 ---
 

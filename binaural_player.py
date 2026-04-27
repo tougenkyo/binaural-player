@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 """
-binaural_player.py  -  Binaural Multi-format Audio Player
+binaural_player.py  -  Spatial Dual Player
 対応フォーマット: WAV / FLAC / OGG / AIFF / MP3 / AAC(M4A) / OPUS
 """
 from __future__ import annotations
@@ -241,7 +241,7 @@ _BASE_DIR     = Path(__file__).parent
 _CONFIG_DIR   = _BASE_DIR / "config"
 _FFMPEG_DIR   = _BASE_DIR / "ffmpeg_bin"
 _FFMPEG_EXE   = _FFMPEG_DIR / ("ffmpeg.exe" if platform.system() == "Windows" else "ffmpeg")
-SETTINGS_PATH = _CONFIG_DIR / "binaural_player_setting.json"
+SETTINGS_PATH = _CONFIG_DIR / "spatial_dual_player_setting.json"
 FFMPEG_DL_URL = "https://www.gyan.dev/ffmpeg/builds/ffmpeg-release-essentials.zip"
 
 
@@ -1310,7 +1310,7 @@ class StereoWavPlayerApp:
         _apply_globals(saved)
 
         self._root = TkinterDnD.Tk()
-        self._root.title("Binaural Audio Player  [ WAV / FLAC / OGG / AIFF / MP3 / AAC / OPUS ]")
+        self._root.title("Spatial Dual Player  [ WAV / FLAC / OGG / AIFF / MP3 / AAC / OPUS ]")
         self._root.geometry(saved.get("window_geometry", WINDOW_SIZE))
         self._root.resizable(True, True)
 
@@ -1605,7 +1605,7 @@ class StereoWavPlayerApp:
         path_str = filedialog.asksaveasfilename(
             title=_t("btn_save"), defaultextension=".json",
             filetypes=[("JSON", "*.json"), ("*", "*.*")],
-            initialfile="binaural_player_setting.json",
+            initialfile="spatial_dual_player_setting.json",
         )
         if not path_str:
             return
