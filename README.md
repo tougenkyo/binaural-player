@@ -3,6 +3,8 @@
 バイノーラル再生対応の2チャンネル音声プレイヤーです。  
 A two-channel audio player with binaural spatial positioning.
 
+![screenshot](images/screenshot.png)
+
 ---
 
 ## 特徴 / Features
@@ -38,20 +40,23 @@ https://www.python.org/downloads/ から Python 3.10 以上をダウンロード
 ### 2. リポジトリをクローン
 
 ```bash
-git clone https://github.com/<your-username>/binaural-player.git
+git clone https://github.com/tougenkyo/binaural-player.git
 cd binaural-player
 ```
 
-または ZIP でダウンロードして展開してください。
+または右上の **「Code」→「Download ZIP」** でダウンロードして展開してください。
 
 ### 3. 起動
 
+`start.bat` をダブルクリックするだけで起動できます。
+
 ```bash
+# またはコマンドラインから
 python binaural_player.py
 ```
 
 **初回起動時、不足しているライブラリ（numpy, sounddevice 等）の自動インストールを促すダイアログが表示されます。**  
-「はい / Yes」を選択するとインストールが自動で行われ、アプリが再起動します。
+「はい / Yes」を選択するとインストールが自動で行われます。
 
 手動でインストールする場合：
 
@@ -91,10 +96,13 @@ language/
 
 ```
 binaural_player.py     メインスクリプト
+start.bat              Windows 用起動スクリプト
 requirements.txt       依存ライブラリ一覧
 language/
   en.json              英語翻訳ファイル
   ja.json              日本語翻訳ファイル
+images/
+  screenshot.png       スクリーンショット
 config/                設定ファイル保存先（自動生成・gitignore済み）
 ffmpeg_bin/            FFmpeg バイナリ（自動DL時・gitignore済み）
 ```
