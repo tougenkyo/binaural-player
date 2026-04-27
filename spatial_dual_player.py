@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 """
-binaural_player.py  -  Spatial Dual Player
+spatial_dual_player.py  -  Spatial Dual Player
 対応フォーマット: WAV / FLAC / OGG / AIFF / MP3 / AAC(M4A) / OPUS
 """
 from __future__ import annotations
