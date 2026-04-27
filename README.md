@@ -40,8 +40,8 @@ https://www.python.org/downloads/ から Python 3.10 以上をダウンロード
 ### 2. リポジトリをクローン
 
 ```bash
-git clone https://github.com/tougenkyo/binaural-player.git
-cd binaural-player
+git clone https://github.com/tougenkyo/spatial-dual-player.git
+cd spatial-dual-player
 ```
 
 または右上の **「Code」→「Download ZIP」** でダウンロードして展開してください。
