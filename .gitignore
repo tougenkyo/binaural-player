@@ -1,0 +1,22 @@
+# 設定ファイル（ローカルパスが含まれるため除外）
+config/
+
+# FFmpeg 自動ダウンロード先
+ffmpeg_bin/
+
+# Python キャッシュ
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+
+# OS 生成ファイル
+.DS_Store
+Thumbs.db
+desktop.ini
+
+# エディタ設定
+.vscode/
+.idea/
+*.swp
+*.swo
