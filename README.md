@@ -95,7 +95,7 @@ language/
 ## フォルダ構成 / Directory Structure
 
 ```
-binaural_player.py     メインスクリプト
+spatial_dual_player.py    メインスクリプト
 start.bat              Windows 用起動スクリプト
 requirements.txt       依存ライブラリ一覧
 language/
