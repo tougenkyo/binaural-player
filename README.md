@@ -52,7 +52,7 @@ cd spatial-dual-player
 
 ```bash
 # またはコマンドラインから
-python binaural_player.py
+python spatial_dual_player.py
 ```
 
 **初回起動時、不足しているライブラリ（numpy, sounddevice 等）の自動インストールを促すダイアログが表示されます。**  
