@@ -1314,14 +1314,11 @@ class StereoWavPlayerApp:
         self._root.geometry(saved.get("window_geometry", WINDOW_SIZE))
         self._root.resizable(True, True)
 
-        self._build_layout(saved)
-
-        # 前回の保存パスを保持する（上書き保存に使用）
+        # 前回の保存パスを保持する（上書き保存に使用・rebuild でリセットしない）
         self._last_save_path: Optional[Path] = None
 
-        # build 後に全ウィジェットを再帰走査してテーマ色を適用する。
-        # option_add は明示的に bg= を渡したウィジェットには効かないため、
-        # 構築後に走査する方式が唯一確実に全体へ適用できる。
+        self._build_layout(saved)
+
         if _CURRENT_THEME == "dark":
             self._apply_dark(self._root)
 
@@ -1489,7 +1486,14 @@ class StereoWavPlayerApp:
             fg="#555", font=("", 8), anchor="w",
         ).pack(side=tk.LEFT)
 
-        # ダークモードチェックボックス（ステータスラベルの右端）
+        # バージョン表示（一番右端）
+        tk.Label(
+            status_bar,
+            text=f"v{APP_VERSION}",
+            fg="#999", font=("", 7),
+        ).pack(side=tk.RIGHT, padx=(2, 4))
+
+        # ダークモードチェックボックス（バージョンの左）
         self._dark_var = tk.BooleanVar(value=(_CURRENT_THEME == "dark"))
         dark_frame = tk.Frame(status_bar, relief=tk.GROOVE, bd=1)
         dark_frame.pack(side=tk.RIGHT, padx=(6, 0))
@@ -1501,13 +1505,6 @@ class StereoWavPlayerApp:
             font=("", 8),
             padx=4, pady=1,
         ).pack()
-
-        # バージョン表示（ダークモードの右）
-        tk.Label(
-            status_bar,
-            text=f"v{APP_VERSION}",
-            fg="#999", font=("", 7),
-        ).pack(side=tk.RIGHT, padx=(4, 2))
 
         # 言語選択（ダークモードの左）
         lang_frame = tk.Frame(status_bar)
@@ -1545,22 +1542,55 @@ class StereoWavPlayerApp:
         self._status_var.set(_t("status_stopped"))
 
     def _on_lang_change(self, _event=None) -> None:
+        global _CURRENT_LANG
         lang = self._lang_var.get().lower()
-        self._save_pref_and_restart(lang=lang)
+        if lang == _CURRENT_LANG:
+            return
+        _CURRENT_LANG = lang if lang in STRINGS else "en"
+        self._rebuild_ui()
 
     def _on_theme_change(self) -> None:
+        global _CURRENT_THEME
         theme = "dark" if self._dark_var.get() else "light"
-        self._save_pref_and_restart(theme=theme)
+        if theme == _CURRENT_THEME:
+            return
+        _CURRENT_THEME = theme
+        self._rebuild_ui()
+
+    def _rebuild_ui(self) -> None:
+        """
+        言語・テーマ変更時に UI を再構築する。
+        再起動せずに全ウィジェットを破棄して作り直すことで
+        設定を維持したまま即座に切り替えられる。
+        """
+        # 現在の設定を保存してから再構築する
+        saved = self._collect_data()
+        save_settings_to(SETTINGS_PATH, saved)
+
+        # 再生を停止する
+        self._left_panel.force_stop()
+        self._right_panel.force_stop()
+
+        # 全ウィジェットを破棄する
+        for widget in self._root.winfo_children():
+            widget.destroy()
+
+        # UI を再構築する
+        self._build_layout(saved)
+
+        # ダークモードを適用する
+        if _CURRENT_THEME == "dark":
+            self._apply_dark(self._root)
 
     def _save_pref_and_restart(self, lang: str = None, theme: str = None) -> None:
-        """言語またはテーマの設定を保存してアプリを再起動する。"""
-        data = self._collect_data()
+        """互換用（現在は _rebuild_ui を使用）"""
         if lang:
-            data["lang"] = lang
+            global _CURRENT_LANG
+            _CURRENT_LANG = lang
         if theme:
-            data["theme"] = theme
-        save_settings_to(SETTINGS_PATH, data)
-        _restart_app()
+            global _CURRENT_THEME
+            _CURRENT_THEME = theme
+        self._rebuild_ui()
 
     def _collect_data(self) -> dict:
         return {
