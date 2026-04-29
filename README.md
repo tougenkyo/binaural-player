@@ -1,7 +1,7 @@
-# Spatial Dual Player
+# Spatial Multi Player
 
-2つの音声ファイルを独立した空間定位で同時再生できる、デュアルチャンネル音声プレイヤーです。  
-A dual-channel audio player that plays two audio files independently with spatial positioning.
+複数チャンネルの音声ファイルを空間定位付きで同時再生できる、マルチチャンネル音声プレイヤーです。  
+A multi-channel audio player that plays multiple audio files independently with spatial positioning.
 
 ![screenshot](images/screenshot.png)
 
@@ -9,7 +9,7 @@ A dual-channel audio player that plays two audio files independently with spatia
 
 ## 特徴 / Features
 
-- **デュアルチャンネル独立再生** — 2つの音声ファイルをそれぞれ独立したチャンネルで再生
+- **マルチチャンネル独立再生** — 複数の音声ファイルをそれぞれ独立したチャンネルで再生（チャンネル数は自由に変更可能）
 - **空間定位（バイノーラル）** — クリック/ドラッグで音源の方向・距離を3D空間内で設定（ヘッドフォン推奨）
 - **連続再生 / ランダム再生** — リスト内を順番またはランダムに連続再生
 - **多形式対応** — WAV / FLAC / OGG / AIFF / MP3 / AAC / OPUS
@@ -40,8 +40,8 @@ https://www.python.org/downloads/ から Python 3.10 以上をダウンロード
 ### 2. リポジトリをクローン
 
 ```bash
-git clone https://github.com/tougenkyo/spatial-dual-player.git
-cd spatial-dual-player
+git clone https://github.com/tougenkyo/spatial-multi-player.git
+cd spatial-multi-player
 ```
 
 または右上の **「Code」→「Download ZIP」** でダウンロードして展開してください。
@@ -52,7 +52,7 @@ cd spatial-dual-player
 
 ```bash
 # またはコマンドラインから
-python spatial_dual_player.py
+python binaural_player.py
 ```
 
 **初回起動時、不足しているライブラリ（numpy, sounddevice 等）の自動インストールを促すダイアログが表示されます。**  
@@ -95,7 +95,7 @@ language/
 ## フォルダ構成 / Directory Structure
 
 ```
-spatial_dual_player.py    メインスクリプト
+binaural_player.py     メインスクリプト
 start.bat              Windows 用起動スクリプト
 requirements.txt       依存ライブラリ一覧
 language/
