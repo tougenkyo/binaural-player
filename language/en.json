@@ -61,5 +61,8 @@
   "ffmpeg_done_title": "Complete",
   "ffmpeg_done_msg": "FFmpeg installed.\nMP3 / AAC / OPUS can now be played.",
   "ffmpeg_failed_msg": "Failed. Please install manually.",
-  "ffmpeg_retry_btn": "Retry"
+  "ffmpeg_retry_btn": "Retry",
+  "ch_count": "Channels",
+  "ch_label": "Channel",
+  "status_ch_changed": "Channel count changed to "
 }

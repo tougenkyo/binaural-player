@@ -61,5 +61,8 @@
   "ffmpeg_done_title": "完了",
   "ffmpeg_done_msg": "FFmpeg のインストールが完了しました。\nMP3 / AAC / OPUS が再生できます。",
   "ffmpeg_failed_msg": "失敗しました。手動でインストールしてください。",
-  "ffmpeg_retry_btn": "再試行"
+  "ffmpeg_retry_btn": "再試行",
+  "ch_count": "チャンネル数",
+  "ch_label": "チャンネル",
+  "status_ch_changed": "チャンネル数を変更しました: "
 }
