@@ -462,28 +462,78 @@ def read_audio(path: Path) -> tuple[np.ndarray, int]:
 _REF_DIST = 0.5
 
 
+def _apply_rear_lpf(signal: np.ndarray, rear_amount: float, sr: int) -> np.ndarray:
+    """
+    後方定位のための高域減衰フィルター（1次 IIR ローパス）。
+
+    rear_amount: 0.0（真正面）〜 1.0（真後方）
+    後方ほど高域が減衰し「こもった感じ」になる。
+
+    scipy を使わず numpy で実装することで：
+    ・チャンク処理で zi 状態を持つ必要がない
+    ・金属音（位相歪み・コムフィルター）が発生しない
+    ・バッファ全体に一括適用するためクリックが出ない
+    """
+    if rear_amount < 0.05:
+        return signal
+
+    # カットオフ周波数: 前方 = ほぼ素通し / 後方 = 4000Hz 程度
+    # RC フィルター係数 α = dt / (RC + dt), dt = 1/sr
+    cutoff_hz = 16000 - rear_amount * 12000   # 16kHz〜4kHz
+    rc = 1.0 / (2.0 * np.pi * cutoff_hz)
+    dt = 1.0 / sr
+    alpha = float(dt / (rc + dt))            # 0 に近いほどカット強い
+
+    # 1次 IIR: y[n] = alpha * x[n] + (1 - alpha) * y[n-1]
+    # numpy の cumsum を使ったベクトル実装（ループなしで高速）
+    # 参考: y = α * x の累積和を (1-α)^k で重み付けすると等価
+    out = np.empty_like(signal)
+    prev = signal[0]
+    beta = 1.0 - alpha
+    for i in range(len(signal)):
+        prev = alpha * signal[i] + beta * prev
+        out[i] = prev
+    return out.astype(np.float32)
+
+
 def compute_stereo(
     mono:   np.ndarray,
     pos:    BinauralPosition,
     volume: int,
+    sr:     int = 44100,
 ) -> np.ndarray:
     """
     モノラル音声をステレオに変換する。
-    フィルター・遅延なし、L/R ゲイン差だけで定位を表現する。
-      az =   0° → センター (L=R)
-      az = +90° → 右寄り  (R大 L小)
-      az = -90° → 左寄り  (L大 R小)
+
+    左右定位: sin(アジマス) によるゲイン差
+    前後定位:
+      ・後方（|az| > 90°）は音量を最大 20% 下げる
+      ・後方は高域を緩やかにカット（1次 IIR LPF、金属音なし）
+    これにより -20° と -160° の聞こえ方が異なるようになる。
     """
     az   = np.radians(np.clip(pos.azimuth, -180, 180))
     dist = max(0.05, pos.distance)
 
+    # ── 左右パンニング ──────────────────────────────
     pan_r = float(np.clip(0.5 + 0.5 * np.sin(az), 0.0, 1.0))
     pan_l = float(np.clip(0.5 - 0.5 * np.sin(az), 0.0, 1.0))
 
     dist_gain = float(np.clip(_REF_DIST / dist, 0.1, 3.0)) * (volume / 100.0)
 
-    l_out = (mono * pan_l * dist_gain).astype(np.float32)
-    r_out = (mono * pan_r * dist_gain).astype(np.float32)
+    # ── 前後判定 ────────────────────────────────────
+    # cos(az): 前方=+1, 真横=0, 後方=-1
+    cos_az = float(np.cos(az))
+    # rear_amount: 0（前方・真横）〜 1（真後方）
+    rear_amount = float(np.clip(-cos_az, 0.0, 1.0))
+
+    # ── 後方の音量減衰（後方ほど小さく聞こえる）────
+    rear_vol_factor = 1.0 - rear_amount * 0.20   # 最大 20% 減
+
+    # ── 後方の高域カット（こもり感）────────────────
+    processed = _apply_rear_lpf(mono, rear_amount, sr)
+
+    l_out = (processed * pan_l * dist_gain * rear_vol_factor).astype(np.float32)
+    r_out = (processed * pan_r * dist_gain * rear_vol_factor).astype(np.float32)
 
     return np.column_stack([l_out, r_out])
 
@@ -505,6 +555,7 @@ class AudioEngine:
         self.is_loading = False
         self._stream: Optional[sd.OutputStream] = None
         self._data: Optional[np.ndarray] = None   # stereo float32
+        self._mono: Optional[np.ndarray] = None   # mono source（update_position 用）
         self._samplerate: int = 44100
         self._pos: int = 0
         # リアルタイム更新用ゲイン（位置変更で差し替え）
@@ -535,9 +586,10 @@ class AudioEngine:
             xs_new   = np.linspace(0.0, orig_len - 1, new_len)
             mono     = np.interp(xs_new, xs_orig, mono).astype(np.float32)
 
-        stereo = compute_stereo(mono, pos, volume)
+        stereo = compute_stereo(mono, pos, volume, sr)
 
         with self._lock:
+            self._mono       = mono
             self._data       = stereo
             self._samplerate = sr
 
@@ -546,14 +598,10 @@ class AudioEngine:
 
     def update_position(self, pos: BinauralPosition, volume: int) -> None:
         """再生中の位置・音量変更を次チャンクから反映する。"""
-        az   = np.radians(np.clip(pos.azimuth, -180, 180))
-        dist = max(0.05, pos.distance)
-        pan_r = float(np.clip(0.5 + 0.5 * np.sin(az), 0.0, 1.0))
-        pan_l = float(np.clip(0.5 - 0.5 * np.sin(az), 0.0, 1.0))
-        dist_gain = float(np.clip(_REF_DIST / dist, 0.1, 3.0)) * (volume / 100.0)
         with self._lock:
-            self._l_gain = pan_l * dist_gain
-            self._r_gain = pan_r * dist_gain
+            if self._data is None or self._mono is None:
+                return
+            self._data = compute_stereo(self._mono, pos, volume, self._samplerate)
 
     def play(self) -> None:
         if self._data is None:
@@ -768,7 +816,7 @@ DEFAULT_RND  = 0
 DEFAULT_AZ   = {"left": -45.0, "right": 45.0}
 POLL_MS      = 150
 WINDOW_SIZE  = "1040x780"
-APP_VERSION  = "1.0.0"
+APP_VERSION  = "1.0.1"
 
 
 class PlayerPanel(tk.Frame):
